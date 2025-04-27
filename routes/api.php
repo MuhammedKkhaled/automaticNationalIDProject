@@ -1,12 +1,14 @@
 <?php
 
+use App\Helpers\IdCardParser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Codesmiths\LaravelOcrSpace\OcrSpaceOptions;
-use Codesmiths\LaravelOcrSpace\Facades\OcrSpace;
-use App\Http\Controllers\API\IdVerificationController;
 use Codesmiths\LaravelOcrSpace\Enums\Language;
 use Codesmiths\LaravelOcrSpace\Enums\InputType;
+use Codesmiths\LaravelOcrSpace\OcrSpaceOptions;
+use Codesmiths\LaravelOcrSpace\Facades\OcrSpace;
+use Codesmiths\LaravelOcrSpace\Enums\OcrSpaceEngine;
+use App\Http\Controllers\API\IdVerificationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,28 +18,27 @@ Route::get('/user', function (Request $request) {
 Route::post('id-verification/upload', [IdVerificationController::class, 'upload']);
 
 Route::post('id-verification/verify', function (Request $request) {
-    $getFilePath = public_path('storage/ocr-images/2hwEs8cMy68b0yr6ozPfEM0ci8aLwzvPBBIKmjxN.jpg');
+    $getFilePath = public_path('storage/image/1744884394.jpeg');
 
     $results = OcrSpace::parseImageFile(
         $getFilePath,
-        OcrSpaceOptions::make()->language(Language::Arabic)->overlayRequired(true   )
+        OcrSpaceOptions::make()
+            ->language(Language::Auto)
+            ->OCREngine(OcrSpaceEngine::Engine2)
+
     );
 
     $response =   $results->getParsedResults(); // Returns an Collection `ParsedResult`
 
-    dd($response);
-    // $results = $results->
-
     // Extract the parsed text from results
-    $parsedText = $results->getParsedResults();
-    // $processingTime = $results->processingTimeInMilliseconds;
+    $parsedText = $response->first()->getSerializedParsedText(); // Returns the parsed text from the first parsed result
+
 
     return response()->json([
         'message' => 'Image processed successfully',
         'data' => [
             'text' => $parsedText,
-            // 'processing_time_ms' => $processingTime,
-            // 'success' => !$results->isErroredOnProcessing
+            'national_id' => IdCardParser::arabicToEnglish($parsedText),
         ]
     ], 200);
 });

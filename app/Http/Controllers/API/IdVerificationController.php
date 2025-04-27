@@ -25,7 +25,7 @@ class IdVerificationController extends Controller
 
     public function upload(Request $request)
     {
-
+        // dd("test");
 
         $request->validate(['image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048']);
 
@@ -49,12 +49,12 @@ class IdVerificationController extends Controller
 
             if ($verificationResult['is_valid']) {
                 return response()->json(
-                    ['message' => "It's valid image"],
+                    ['message' => "It's valid card ID image"],
                     200
                 );
             } else {
                 return response()->json(
-                    ['message' => "there is an error"],
+                    ['message' => "It's not valid Card ID image"],
                     400
                 );
             }
