@@ -9,6 +9,11 @@ use Codesmiths\LaravelOcrSpace\OcrSpaceOptions;
 use Codesmiths\LaravelOcrSpace\Facades\OcrSpace;
 use Codesmiths\LaravelOcrSpace\Enums\OcrSpaceEngine;
 use App\Http\Controllers\API\IdVerificationController;
+use App\Http\Controllers\API\ZoomIntegrateController;
+use App\Http\Controllers\ZoomController;
+use Jubaer\Zoom\Facades\Zoom as FacadesZoom;
+use Jubaer\Zoom\Zoom;
+use Jubaer\Zoom\ZoomServiceProvider;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -18,13 +23,13 @@ Route::get('/user', function (Request $request) {
 Route::post('id-verification/upload', [IdVerificationController::class, 'upload']);
 
 Route::post('id-verification/verify', function (Request $request) {
-    $getFilePath = public_path('storage/image/1744884394.jpeg');
+    $getFilePath = public_path('storage/ocr-images/WhatsApp Image 2025-04-16 at 2.37.00 PM.jpeg');
 
     $results = OcrSpace::parseImageFile(
         $getFilePath,
         OcrSpaceOptions::make()
-            ->language(Language::Auto)
-            ->OCREngine(OcrSpaceEngine::Engine2)
+            ->language(Language::English)
+        // ->OCREngine(OcrSpaceEngine::Engine2)
 
     );
 
@@ -41,4 +46,28 @@ Route::post('id-verification/verify', function (Request $request) {
             'national_id' => IdCardParser::arabicToEnglish($parsedText),
         ]
     ], 200);
+});
+
+
+Route::get('start', [ZoomController::class, 'index']);
+Route::any('redirect-url', [ZoomController::class, 'index']);
+Route::post('create-meeting', function(){
+
+    $data = [
+        'topic' => 'Test Meeting',
+        'start_time' => now()->addDay()->toIso8601String(), // tomorrow
+        'duration' => 30, // minutes
+        'agenda' => 'Discuss project updates',
+    ];
+
+    $zoomController = new ZoomIntegrateController();
+
+    $meeting = $zoomController->createZoomMeeting($data);
+
+    dd($meeting);
+    // $meetings = FacadesZoom::createMeeting
+    // return response()->json([
+    //     'message' => 'Meeting created successfully',
+    //     'data' => $meetings
+    // ], 200);
 });
