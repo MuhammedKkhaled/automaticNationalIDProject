@@ -55,7 +55,7 @@ Route::post('create-meeting', function(){
 
     $data = [
         'topic' => 'Test Meeting',
-        'start_time' => now()->addDay()->toIso8601String(), // tomorrow
+        'start_time' => now()->addHour()->toIso8601String(), // tomorrow
         'duration' => 30, // minutes
         'agenda' => 'Discuss project updates',
     ];
@@ -64,10 +64,77 @@ Route::post('create-meeting', function(){
 
     $meeting = $zoomController->createZoomMeeting($data);
 
-    dd($meeting);
+    // dd($meeting);
     // $meetings = FacadesZoom::createMeeting
-    // return response()->json([
-    //     'message' => 'Meeting created successfully',
-    //     'data' => $meetings
-    // ], 200);
+    return response()->json([
+        'message' => 'Meeting created successfully',
+        'data' => $meeting
+    ], 200);
+
+    //  $zoomController = new ZoomIntegrateController();
+    // $data =  $zoomController->participants(86767866906);
+    // dd($data);
+
+
+
+});
+
+
+Route::get('participants', function () {
+
+    $meetingID = "88636371650";
+    // "YsesTv3RSUSp+UcVH4jLbw=="
+    $zoomController = new ZoomIntegrateController();
+
+    $participants = $zoomController->participants($meetingID);
+
+    return response()->json([
+        'message' => 'Participants fetched successfully',
+        'data' => $participants
+    ], 200);
+
+});
+
+Route::post('create-event' , function(){
+    $data = [
+        "name" => "Event for testing",
+        'description' => "Event for testing Description",
+        'event_type'=> "SIMPLE_EVENT",
+        'access_level' => "PRIVATE_UNRESTRICTED",
+    ];
+
+    $zoomController = new ZoomIntegrateController();
+    $event = $zoomController->createEvent($data);
+
+    return response()->json([
+        'message' => 'Event created successfully',
+        'data' => $event
+    ], 201);
+});
+
+
+Route::get('get-hubs' , function (){
+    $zoomController = new ZoomIntegrateController();
+    $hubs = $zoomController->getHubs();
+    return response()->json([
+        'message' => 'Hubs fetched successfully',
+        'data' => $hubs
+    ], 200);
+});
+
+Route::post('create-webinar' , function (){
+        $data =[
+            'start_time' => now()->addMinutes(30)->toIso8601String(),
+            'topic'=>"New Webinar Test",
+            'duration' => 30,
+            'agenda' => "This is a test webinar",
+            'schedule_for' => "moez@career-180.com",
+        ];
+
+        $zoomController = new ZoomIntegrateController();
+        $webinar = $zoomController->createWebinar($data);
+        return response()->json([
+            'message' => 'Webinar created successfully',
+            'data' => $webinar
+        ], 201);
 });
